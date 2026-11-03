@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ułóż tekst o nieśmiertelności</title>
+<style>
+  :root { color-scheme: light; }
+  body { margin:0; background:#f4f6f8; color:#17212b; font-family:Arial,Helvetica,sans-serif; line-height:1.55; }
+  main { max-width:980px; margin:0 auto; padding:28px 18px 48px; }
+  h1 { font-size:clamp(1.5rem,3vw,2.2rem); line-height:1.2; margin:0 0 10px; }
+  .intro { font-size:1.08rem; color:#46515c; margin:0 0 22px; }
+  .instructions { background:#eaf1fb; border-left:4px solid #3973bd; padding:14px 16px; border-radius:8px; margin-bottom:20px; }
+  #list { display:flex; flex-direction:column; gap:14px; }
+  .paragraph { background:white; border:1px solid #d6dde5; border-radius:12px; padding:18px 18px 14px; box-shadow:0 2px 7px #1525360c; cursor:grab; }
+  .paragraph.dragging { opacity:.45; border:2px dashed #3973bd; }
+  .paragraph.over { outline:3px solid #9bbce8; }
+  .topline { display:flex; align-items:center; gap:10px; margin-bottom:10px; }
+  .letter { display:inline-flex; align-items:center; justify-content:center; width:34px; height:34px; flex:0 0 34px; border-radius:50%; background:#e9eef5; font-weight:700; }
+  .handle { color:#637181; font-size:.9rem; }
+  .controls { margin-left:auto; display:flex; gap:6px; }
+  button { font:inherit; cursor:pointer; border:0; border-radius:8px; padding:9px 13px; background:#245fa8; color:white; }
+  button.secondary { background:#e7edf4; color:#1d2c3b; padding:6px 10px; }
+  button:focus, .paragraph:focus { outline:3px solid #86b7f4; outline-offset:2px; }
+  .text { font-size:clamp(1.05rem,1.8vw,1.22rem); white-space:pre-wrap; }
+  .actions { display:flex; flex-wrap:wrap; gap:10px; margin-top:22px; }
+  #result { margin-top:18px; padding:14px 16px; border-radius:10px; font-size:1.08rem; display:none; }
+  #result.good { display:block; background:#e7f5ec; color:#14532d; }
+  #result.bad { display:block; background:#fff3df; color:#75420b; }
+  .small { font-size:.92rem; color:#586575; margin-top:18px; }
+  @media (max-width:600px) { main {padding:22px 12px 36px;} .paragraph {padding:14px;} .controls button {padding:6px 8px;} }
+</style>
+</head>
+<body>
+<main>
+  <h1>Ułóż tekst o nieśmiertelności</h1>
+  <p class="intro">Przeczytaj uważnie wszystkie akapity i ułóż je w takiej kolejności, aby powstał spójny tekst.</p>
+  <div class="instructions">
+    <strong>Instrukcja:</strong> Przeciągaj całe akapity, aby zmienić ich kolejność. Możesz też używać przycisków ↑ i ↓. Gdy skończysz, kliknij <strong>„Sprawdź odpowiedź”</strong>.
+  </div>
+  <section id="list" aria-label="Akapity do uporządkowania"></section>
+  <div class="actions">
+    <button id="check">Sprawdź odpowiedź</button>
+    <button id="reset" class="secondary">Wymieszaj ponownie</button>
+  </div>
+  <div id="result" role="status" aria-live="polite"></div>
+  <p class="small">Powodzenia!</p>
+</main>
+<script>
+const paragraphs = [
+{letter:"A", text:"Biblijni patriarchowie byli długowieczni. Adam miał żyć 930 lat, Noe 950, a wszelkie rekordy pobiłby Matuzalem, dożywając 969 lat. Czy kiedykolwiek zdołamy im dorównać? Nauka nie pozostawia złudzeń. Gdyby ciało ludzkie nie ulegało starzeniu i zniszczeniu, należałoby zanegować wszelkie prawa fizyki i chemii. Świadomość, że jest to niemożliwe, nie przeszkadza nam jednak od dawna snuć marzeń o nieśmiertelności."},
+{letter:"B", text:"Współczesna nauka nie tyle wydłuża życie, ile likwiduje przyczyny, które je skracały. Nowe odkrycia rodzą nowe nadzieje, jak na przykład hibernacja, czyli zamrożenie ciała w ciekłym azocie. Nie ma żadnej pewności, że powrót do życia kiedykolwiek nastąpi. A gdyby nawet tak się stało, to czy człowiek przebudzony w innej epoce potrafiłby się w niej odnaleźć?"},
+{letter:"C", text:"Nieuchronnie nasuwało się więc pytanie, czy tymi dobrodziejstwami nie mogliby się podzielić z ludźmi? Wyobraźnia podpowiadała, że tak. Nawet mędrcy, którzy powątpiewali w prawdziwość mitów, wierzyli w istnienie Wysp Szczęśliwych, których mieszkańcy dożywają tysięcy lat bez chorób i cierpienia. Im jednak lepiej poznawano świat, tym mniej pozostawało w nim miejsca na złudzenia."},
+{letter:"D", text:"Wymarzona nieśmiertelność nie musi być wcale dobrodziejstwem. Obdarzeni nią wybrańcy szybko przekonaliby się, że może stać się wręcz przekleństwem. Ich życie byłoby przecież śmiertelnie nudne i smutne, co kilkadziesiąt lat traciliby wszystkich bliskich, wciąż na nowo musieliby zakładać rodziny, oswajać się z osiągnięciami kolejnych rewolucji technicznych, zdobywać wymagającą coraz to innych kwalifikacji pracę, a na upragnioną emeryturę czekać milion albo i więcej lat. Czy więc naprawdę warto?"},
+{letter:"E", text:"Ludzie próbowali więc rozgryźć tajemnicę nieśmiertelności także na własną rękę, nie korzystając z pomocy sił nieczystych. Działania szły w dwóch kierunkach – szukania gotowych przedmiotów, które same z siebie mają moc przedłużania życia, lub ich stworzenia. Trud samodzielnego wyprodukowania eliksiru życia podejmowali alchemicy. Według nich w niedoskonałej materii została uwięziona boska iskra. Gdyby udało się nad nią zapanować, człowiek posiadłby środek przezwyciężający wszelkie ułomności – również chorobę i śmierć. Kluczem do odkrycia największej tajemnicy był kamień filozoficzny. Próbowano go wytworzyć, mieszając w różnych proporcjach rtęć i siarkę oraz przeróżne dodatki, od ołowiu po krew. Efekty były najczęściej odwrotne do zamierzonych, gdyż większość używanych substancji miała właściwości toksyczne i zamiast wydłużać, skracała życie."},
+{letter:"F", text:"Najnowszy pomysł na nieśmiertelność to przeniesienie zawartości mózgu do rzeczywistości wirtualnej, w której nie podlegałaby procesom zniszczenia. Ponieważ o tym, kim jesteśmy i co czujemy, nie decydują nogi czy żołądek, lecz świadomość, to ją należałoby uwieczniać po wsze czasy. Przepis ten wydaje się całkowicie absurdalny, jednak jego entuzjaści odwołują się do analogii między mechanizmem działania mózgu i komputera. Ich zdaniem w przyszłości będzie można kopiować mózg tak jak dziś twarde dyski."},
+{letter:"G", text:"Już w epoce kamiennej ludzie nie mogli pogodzić się z myślą, że śmierć jest kresem ich egzystencji. Gdyby było inaczej, nie umieszczaliby w grobach przedmiotów, które miały pomagać zmarłym w pośmiertnej wędrówce. Nie układaliby zwłok w kierunku wschodzącego słońca, które gasnąc wieczorem, o świcie odradzało się do nowego życia. Wierzyli, że taki sam cykl jest przeznaczeniem człowieka. Wpisana weń konieczność umierania świadczyła jednak o ludzkiej niedoskonałości. Prawdziwa i bezbolesna nieśmiertelność była zastrzeżona dla istot wyższych – bogów, duchów, herosów."},
+{letter:"H", text:"Inaczej życie wieczne traktują wielkie religie, według których wszystko, co materialne musi przeminąć, a trwała i wieczna jest jedynie dusza. Skoro Bóg obiecał wieczne życie dopiero po śmierci, zwracanie się do niego z prośbami o nieśmiertelność na tym świecie byłoby czynem nagannym. Ale pozostawał jeszcze diabeł. Igranie z mocą nieczystą przynosiło doraźne korzyści, było jednak bardzo ryzykowne, a ceną za uratowanie ciała mogła być utrata duszy."}
+];
+const answer = "AGCHEBFD";
+const list = document.getElementById("list");
+const result = document.getElementById("result");
+let dragging = null;
+function render(items) {
+  list.innerHTML = "";
+  items.forEach((p, i) => {
+    const card = document.createElement("article");
+    card.className = "paragraph";
+    card.draggable = true;
+    card.dataset.letter = p.letter;
+    card.tabIndex = 0;
+    card.innerHTML = `<div class="topline"><span class="letter">${p.letter}</span><span class="handle">Przeciągnij, aby zmienić kolejność</span><span class="controls"><button class="secondary up" aria-label="Przesuń akapit ${p.letter} w górę">↑</button><button class="secondary down" aria-label="Przesuń akapit ${p.letter} w dół">↓</button></span></div><div class="text"></div>`;
+    card.querySelector(".text").textContent = p.text;
+    card.querySelector(".up").addEventListener("click", () => move(i, -1));
+    card.querySelector(".down").addEventListener("click", () => move(i, 1));
+    card.addEventListener("dragstart", e => { dragging = card; card.classList.add("dragging"); e.dataTransfer.effectAllowed="move"; });
+    card.addEventListener("dragend", () => { card.classList.remove("dragging"); document.querySelectorAll(".over").forEach(x=>x.classList.remove("over")); dragging=null; });
+    card.addEventListener("dragover", e => { e.preventDefault(); if (dragging && dragging!==card) card.classList.add("over"); });
+    card.addEventListener("dragleave", () => card.classList.remove("over"));
+    card.addEventListener("drop", e => {
+      e.preventDefault(); card.classList.remove("over");
+      if (!dragging || dragging===card) return;
+      const children=[...list.children], from=children.indexOf(dragging), to=children.indexOf(card);
+      if (from<to) list.insertBefore(dragging,card.nextSibling); else list.insertBefore(dragging,card);
+      result.className=""; result.style.display="none";
+    });
+    list.appendChild(card);
+  });
+}
+function currentOrder(){ return [...list.children].map(x=>x.dataset.letter).join(""); }
+function move(index, delta) {
+  const cards=[...list.children], target=index+delta;
+  if(target<0 || target>=cards.length) return;
+  if(delta<0) list.insertBefore(cards[index],cards[target]);
+  else list.insertBefore(cards[target],cards[index]);
+  result.className=""; result.style.display="none";
+}
+function shuffle(items){ const a=[...items]; for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];} return a; }
+render(shuffle(paragraphs));
+document.getElementById("check").addEventListener("click",()=>{
+  const order=currentOrder();
+  result.style.display="block";
+  if(order===answer){ result.className="good"; result.textContent="Brawo! Wszystkie akapity są we właściwej kolejności."; }
+  else { let correct=0; for(let i=0;i<answer.length;i++) if(order[i]===answer[i]) correct++; result.className="bad"; result.textContent=`Jeszcze nie tym razem. Masz ${correct} z 8 akapitów na właściwych pozycjach. Spróbuj ponownie.`; }
+});
+document.getElementById("reset").addEventListener("click",()=>{render(shuffle(paragraphs));result.style.display="none";result.className="";});
+</script>
+</body>
+</html>
